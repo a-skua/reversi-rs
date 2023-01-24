@@ -66,16 +66,16 @@ impl Player {
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Status {
+pub enum State {
     Empty,
     Player(Player),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Board {
-    x: usize,
-    y: usize,
-    source: Vec<Status>,
+    pub x: usize,
+    pub y: usize,
+    source: Vec<State>,
 }
 
 impl Board {
@@ -85,15 +85,15 @@ impl Board {
         let mut source = Vec::with_capacity(x * y);
         for i in 0..x * y {
             match i {
-                27 | 36 => source.push(Status::Player(Player::Player1)),
-                28 | 35 => source.push(Status::Player(Player::Player2)),
-                _ => source.push(Status::Empty),
+                27 | 36 => source.push(State::Player(Player::Player1)),
+                28 | 35 => source.push(State::Player(Player::Player2)),
+                _ => source.push(State::Empty),
             }
         }
         Self { x, y, source }
     }
 
-    pub fn table(&self) -> Vec<&[Status]> {
+    pub fn table(&self) -> Vec<&[State]> {
         let mut table = Vec::with_capacity(self.y);
         for i in 0..self.y {
             let start = i * self.x;
@@ -107,7 +107,7 @@ impl Board {
         p.y as usize * self.y + p.x as usize
     }
 
-    fn status(&self, p: Point) -> Option<Status> {
+    pub fn state(&self, p: Point) -> Option<State> {
         if !self.is_on_board(p) {
             return None;
         }
@@ -120,8 +120,8 @@ impl Board {
     }
 
     fn is_act_vector(&self, player: Player, p: Point, v: Vector) -> bool {
-        match self.status(p) {
-            Some(Status::Empty) => {}
+        match self.state(p) {
+            Some(State::Empty) => {}
             _ => return false,
         }
 
@@ -133,14 +133,14 @@ impl Board {
                 return false;
             }
 
-            let status = if let Some(s) = self.status(p) {
+            let state = if let Some(s) = self.state(p) {
                 s
             } else {
                 return false;
             };
 
-            match status {
-                Status::Player(p) => {
+            match state {
+                State::Player(p) => {
                     if p == player {
                         return is_possible;
                     } else {
@@ -152,7 +152,7 @@ impl Board {
         }
     }
 
-    fn is_act(&self, player: Player, p: Point) -> bool {
+    pub fn is_act(&self, player: Player, p: Point) -> bool {
         let mut is_act = false;
         for v in Vector::values() {
             is_act |= self.is_act_vector(player, p, v);
@@ -183,19 +183,19 @@ impl Board {
         let mut p = p;
         loop {
             p = p.move_point(v);
-            let status = if let Some(s) = self.status(p) {
+            let state = if let Some(s) = self.state(p) {
                 s
             } else {
                 return self;
             };
 
-            match status {
-                Status::Player(target) => {
+            match state {
+                State::Player(target) => {
                     if target == player {
                         return self;
                     } else {
                         let i = self.index(p);
-                        self.source[i] = Status::Player(player);
+                        self.source[i] = State::Player(player);
                     }
                 }
                 _ => return self,
@@ -215,7 +215,7 @@ impl Board {
             new = new.action_vector(player, p, v);
         }
 
-        new.source[self.index(p)] = Status::Player(player);
+        new.source[self.index(p)] = State::Player(player);
         Result::Ok(new)
     }
 }
@@ -241,77 +241,77 @@ mod tests {
     fn board_table() {
         let source = [
             // y = 0
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
             // y = 1
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
             // y = 2
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
             // y = 3
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Player(Player::Player1),
-            Status::Player(Player::Player2),
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Player(Player::Player1),
+            State::Player(Player::Player2),
+            State::Empty,
+            State::Empty,
+            State::Empty,
             // y = 4
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Player(Player::Player2),
-            Status::Player(Player::Player1),
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Player(Player::Player2),
+            State::Player(Player::Player1),
+            State::Empty,
+            State::Empty,
+            State::Empty,
             // y = 5
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
             // y = 6
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
             // y = 7
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
-            Status::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
+            State::Empty,
         ];
 
         let expect = vec![
@@ -412,77 +412,77 @@ mod tests {
                 y: 8,
                 source: vec![
                     // y = 0
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                     // y = 1
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                     // y = 2
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                     // y = 3
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Player(Player::Player2),
-                    Status::Player(Player::Player2),
-                    Status::Player(Player::Player2),
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Player(Player::Player2),
+                    State::Player(Player::Player2),
+                    State::Player(Player::Player2),
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                     // y = 4
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Player(Player::Player2),
-                    Status::Player(Player::Player1),
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Player(Player::Player2),
+                    State::Player(Player::Player1),
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                     // y = 5
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                     // y = 6
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                     // y = 7
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
-                    Status::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
+                    State::Empty,
                 ],
             }),
         );

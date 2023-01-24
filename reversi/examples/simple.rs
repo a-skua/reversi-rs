@@ -1,14 +1,14 @@
 use reversi::*;
 
-fn show(table: Vec<&[Status]>) {
+fn show(table: Vec<&[State]>) {
     println!(" ________________ ");
     for row in table {
         print!("|");
         for col in row {
             match col {
-                Status::Player(Player::Player1) => print!("o "),
-                Status::Player(Player::Player2) => print!("x "),
-                Status::Empty => print!("  "),
+                State::Player(Player::Player1) => print!("o "),
+                State::Player(Player::Player2) => print!("x "),
+                State::Empty => print!("  "),
             }
         }
         println!("|");
