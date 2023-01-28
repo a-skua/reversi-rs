@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "deno.ns"]
+  },
+  "tasks": {
+    "build": "deno run  --allow-net --allow-read --allow-write --allow-env --allow-run ./build.ts"
+  },
+  "fmt": {
+    "files": {
+      "include": ["src/", "bin/", "build.ts"]
+    }
+  }
+}
