@@ -85,8 +85,8 @@ impl Board {
         let mut source = Vec::with_capacity(x * y);
         for i in 0..x * y {
             match i {
-                27 | 36 => source.push(State::Player(Player::Player1)),
-                28 | 35 => source.push(State::Player(Player::Player2)),
+                28 | 35 => source.push(State::Player(Player::Player1)),
+                27 | 36 => source.push(State::Player(Player::Player2)),
                 _ => source.push(State::Empty),
             }
         }
@@ -218,6 +218,16 @@ impl Board {
         new.source[self.index(p)] = State::Player(player);
         Result::Ok(new)
     }
+
+    pub fn count(&self, state: State) -> u32 {
+        let mut count = 0;
+        for s in &self.source {
+            if s == &state {
+                count += 1;
+            }
+        }
+        count
+    }
 }
 
 #[cfg(test)]
@@ -271,8 +281,8 @@ mod tests {
             State::Empty,
             State::Empty,
             State::Empty,
-            State::Player(Player::Player1),
             State::Player(Player::Player2),
+            State::Player(Player::Player1),
             State::Empty,
             State::Empty,
             State::Empty,
@@ -280,8 +290,8 @@ mod tests {
             State::Empty,
             State::Empty,
             State::Empty,
-            State::Player(Player::Player2),
             State::Player(Player::Player1),
+            State::Player(Player::Player2),
             State::Empty,
             State::Empty,
             State::Empty,
@@ -337,10 +347,10 @@ mod tests {
     }
 
     #[test]
-    fn actionable_player2() {
+    fn actionable_player1() {
         let board = Board::new();
 
-        let actual = board.actionable(Player::Player2);
+        let actual = board.actionable(Player::Player1);
         let expect = vec![
             Point::new(3, 2),
             Point::new(2, 3),
@@ -355,58 +365,58 @@ mod tests {
     }
 
     #[test]
-    fn is_act_vector_player2() {
+    fn is_act_vector_player1() {
         let board = Board::new();
 
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::TopLeft),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::TopLeft),
             false
         );
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::Top),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::Top),
             false
         );
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::TopRight),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::TopRight),
             false
         );
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::Right),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::Right),
             false
         );
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::BottomRight),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::BottomRight),
             false
         );
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::Bottom),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::Bottom),
             true
         );
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::BottomLeft),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::BottomLeft),
             false
         );
         assert_eq!(
-            board.is_act_vector(Player::Player2, Point::new(3, 2), Vector::Left),
+            board.is_act_vector(Player::Player1, Point::new(3, 2), Vector::Left),
             false
         );
     }
 
     #[test]
-    fn is_act_player2() {
+    fn is_act_player1() {
         let board = Board::new();
 
-        assert_eq!(board.is_act(Player::Player2, Point::new(2, 3)), true);
-        assert_eq!(board.is_act(Player::Player2, Point::new(2, 2)), false);
-        assert_eq!(board.is_act(Player::Player2, Point::new(3, 2)), true);
-        assert_eq!(board.is_act(Player::Player2, Point::new(3, 3)), false);
+        assert_eq!(board.is_act(Player::Player1, Point::new(2, 3)), true);
+        assert_eq!(board.is_act(Player::Player1, Point::new(2, 2)), false);
+        assert_eq!(board.is_act(Player::Player1, Point::new(3, 2)), true);
+        assert_eq!(board.is_act(Player::Player1, Point::new(3, 3)), false);
     }
 
     #[test]
-    fn action_player2() {
+    fn action_player1() {
         let board = Board::new();
         assert_eq!(
-            board.action(Player::Player2, Point::new(2, 3)),
+            board.action(Player::Player1, Point::new(2, 3)),
             Result::Ok(Board {
                 x: 8,
                 y: 8,
@@ -441,9 +451,9 @@ mod tests {
                     // y = 3
                     State::Empty,
                     State::Empty,
-                    State::Player(Player::Player2),
-                    State::Player(Player::Player2),
-                    State::Player(Player::Player2),
+                    State::Player(Player::Player1),
+                    State::Player(Player::Player1),
+                    State::Player(Player::Player1),
                     State::Empty,
                     State::Empty,
                     State::Empty,
@@ -451,8 +461,8 @@ mod tests {
                     State::Empty,
                     State::Empty,
                     State::Empty,
-                    State::Player(Player::Player2),
                     State::Player(Player::Player1),
+                    State::Player(Player::Player2),
                     State::Empty,
                     State::Empty,
                     State::Empty,
@@ -486,5 +496,13 @@ mod tests {
                 ],
             }),
         );
+    }
+
+    #[test]
+    fn count() {
+        let game = Board::new();
+        assert_eq!(game.count(State::Empty), 60);
+        assert_eq!(game.count(State::Player(Player::Player1)), 2);
+        assert_eq!(game.count(State::Player(Player::Player2)), 2);
     }
 }

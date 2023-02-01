@@ -120,32 +120,6 @@ function draw(board: Board, ctx: CanvasRenderingContext2D, game: Reversi) {
   }
 }
 
-function switchPlayer(p: number, game: Reversi): number {
-  const _switch = (p: number): number => {
-    switch (p) {
-      case Player.Player1:
-        return Player.Player2;
-      default:
-        return Player.Player1;
-    }
-  };
-  p = _switch(p);
-
-  let countActionable = 0;
-  for (let y = 0; y < game.y(); y++) {
-    for (let x = 0; x < game.x(); x++) {
-      if (game.is_act(p, x, y)) {
-        countActionable++;
-      }
-    }
-  }
-
-  if (countActionable !== 0) {
-    return p;
-  }
-  return _switch(p);
-}
-
 function app() {
   let game = Reversi.new_game();
   const canvas = document.createElement("canvas");
@@ -161,8 +135,6 @@ function app() {
     draw(board, ctx, game);
   });
 
-  let currentPlayer: number = Player.Player1;
-
   let currentPosition: Position = { x: 0, y: 0 };
   canvas.addEventListener("mousemove", (e: MouseEvent) => {
     const newPosition = board.position(e.offsetX, e.offsetY);
@@ -172,7 +144,9 @@ function app() {
       return;
     }
     currentPosition = newPosition;
-    if (game.is_act(currentPlayer, currentPosition.x, currentPosition.y)) {
+    if (
+      game.is_act(game.current_player(), currentPosition.x, currentPosition.y)
+    ) {
       board.focus = currentPosition;
     } else {
       board.focus = null;
@@ -184,12 +158,11 @@ function app() {
 
   canvas.addEventListener("mouseup", (e: MouseEvent) => {
     const position = board.position(e.offsetX, e.offsetY);
-    const newGame = game.action(currentPlayer, position.x, position.y);
+    const newGame = game.action(game.current_player(), position.x, position.y);
     if (newGame === undefined) {
       return;
     }
     game = newGame;
-    currentPlayer = switchPlayer(currentPlayer, game);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     draw(board, ctx, game);
